@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 1",
+	"properties": {
+		"content": {
+			"query": "CREATE USER Manager WITHOUT LOGIN;  \nCREATE USER SalesRep1 WITHOUT LOGIN;  \nCREATE USER SalesRep2 WITHOUT LOGIN;\nGO\n\nCREATE SCHEMA Sales\nGO\nCREATE TABLE Sales.Orders \n    (  \n    OrderID int,  \n    SalesRep nvarchar(50),  \n    Product nvarchar(50),  \n    Quantity smallint  \n    );\n\nINSERT INTO Sales.Orders  VALUES (1, 'SalesRep1', 'Valve', 5);\nINSERT INTO Sales.Orders  VALUES (2, 'SalesRep1', 'Wheel', 2);\nINSERT INTO Sales.Orders  VALUES (3, 'SalesRep1', 'Valve', 4);\nINSERT INTO Sales.Orders  VALUES (4, 'SalesRep2', 'Bracket', 2);\nINSERT INTO Sales.Orders  VALUES (5, 'SalesRep2', 'Wheel', 5);\nINSERT INTO Sales.Orders  VALUES (6, 'SalesRep2', 'Seat', 5);\n-- View the 6 rows in the table  \nSELECT * FROM Sales.Orders;\n\nGRANT SELECT ON Sales.Orders TO Manager;  \nGRANT SELECT ON Sales.Orders TO SalesRep1;  \nGRANT SELECT ON Sales.Orders TO SalesRep2; \nGO\n\nCREATE SCHEMA Security;  \nGO  \n  \nCREATE FUNCTION Security.tvf_securitypredicate(@SalesRep AS nvarchar(50))  \n    RETURNS TABLE  \nWITH SCHEMABINDING  \nAS  \n    RETURN SELECT 1 AS tvf_securitypredicate_result\nWHERE @SalesRep = USER_NAME() OR USER_NAME() = 'Manager';  \nGO\n\nCREATE SECURITY POLICY SalesFilter  \nADD FILTER PREDICATE Security.tvf_securitypredicate(SalesRep)\nON Sales.Orders\nWITH (STATE = ON);  \nGO\n\nGRANT SELECT ON Security.tvf_securitypredicate TO Manager;  \nGRANT SELECT ON Security.tvf_securitypredicate TO SalesRep1;  \nGRANT SELECT ON Security.tvf_securitypredicate TO SalesRep1;\n\nEXECUTE AS USER = 'SalesRep1';  \nSELECT * FROM Sales.Orders;\nREVERT;  \n  \nEXECUTE AS USER = 'SalesRep2';  \nSELECT * FROM Sales.Orders;\nREVERT;  \n  \nEXECUTE AS USER = 'Manager';  \nSELECT * FROM Sales.Orders;\nREVERT;\n\nALTER SECURITY POLICY SalesFilter  \nWITH (STATE = OFF);\n\nDROP USER SalesRep1;\nDROP USER SalesRep2;\nDROP USER Manager;\n\nDROP SECURITY POLICY SalesFilter;\nDROP TABLE Sales.Orders;\nDROP FUNCTION Security.tvf_securitypredicate;\nDROP SCHEMA Security;\nDROP SCHEMA Sales;",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "mvpfvjzbmt2ufb2qpocws1p1",
+				"poolName": "mvpfvjzbmt2ufb2qpocws1p1"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
